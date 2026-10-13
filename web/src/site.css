@@ -101,20 +101,25 @@
 .w .a-cta h2 { margin: 0; font-size: clamp(32px, 4.2vw, 56px); line-height: 1.06; text-wrap: balance; }
 .w .a-cta p { margin: 0 0 14px; font-size: 17px; color: var(--w-mut); }
 
-/* step 1: a real switch, replayed line by line, dark in both themes */
+/* the code window, dark in both themes */
 .w .t-win { background: radial-gradient(120% 110% at 80% 0%, rgba(76, 141, 255, 0.16), rgba(76, 141, 255, 0) 60%), #0b0e14; border: 1px solid #1d2230; border-radius: 16px;
   overflow: hidden; box-shadow: 0 30px 80px rgba(14, 16, 22, 0.28), 0 0 0 1px rgba(76, 141, 255, 0.08); }
 .w .t-top { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #1a1f2b; }
 .w .t-top i { width: 10px; height: 10px; border-radius: 50%; background: #2a303d; }
 .w .t-top span { margin-left: 8px; font: 12px 'JetBrains Mono', ui-monospace, monospace; color: #6c7385; }
 .w .t-body { margin: 0; padding: 18px 20px 22px; min-height: 290px; font: 13.5px/1.85 'JetBrains Mono', ui-monospace, monospace; color: #cfd5e1; }
-.w .t-line { white-space: pre-wrap; overflow-wrap: anywhere; }
-.w .t-line .p { color: #4c8dff; }
-.w .t-line .ok { color: #45d49a; }
-.w .t-line .mut { color: #6c7385; }
-.w .t-line .hi { color: #ffffff; }
 .w .t-caret { display: inline-block; width: 8px; height: 16px; background: #4c8dff; vertical-align: -3px; animation: w-blink 1s steps(1) infinite; }
 @keyframes w-blink { 50% { opacity: 0; } }
+/* step 1 on the homepage: the two lines that change, as How it works shows them, typed in each time the window comes into
+   view (siteMotion.js); at rest, and for a reader who asked for less motion, both lines are simply there */
+.w .k-step .k-code { width: min(100%, 640px); }
+.w .k-code .g-hl { transition: background-color 0.3s ease; }
+.w .k-code .g-hl.is-off { background-color: transparent; }
+.w .k-code .g-pre .k-ty { display: inline-block; vertical-align: top; white-space: pre; overflow: hidden; }
+/* the lines in a box as wide as the longest of them, so on a phone, where the code scrolls sideways, the green band still
+   runs under the whole line */
+.w .k-code .g-pre .k-lines { display: inline-block; min-width: 100%; vertical-align: top; }
+.w .k-code .t-caret { vertical-align: top; margin: 5px 0 0 1px; }
 
 /* step 2: requests from three jobs, each routed to the model proven on it (drawn and moved by siteMotion.js) */
 .w .rt { display: block; width: 100%; height: auto; overflow: visible; margin-inline: auto; }
