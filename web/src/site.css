@@ -12,9 +12,12 @@
 .w {
   --pad: clamp(18px, 4vw, 64px);
   --w-gap: clamp(80px, 11vw, 150px);
-  --w-bg: #f7f7f8; --w-ink: #0e1016; --w-mut: #585d6c; --w-faint: #8a8f9d; --w-line: #dfe1e7; --w-card: #ffffff; --w-track: #e4e6ec;
+  /* the faint grey is the lightest that small print can be and still be read on the light ground (4.6 to 1; it was 3 to 1) */
+  --w-bg: #f7f7f8; --w-ink: #0e1016; --w-mut: #585d6c; --w-faint: #6b7080; --w-line: #dfe1e7; --w-card: #ffffff; --w-track: #e4e6ec;
   --w-acc: #0f62fe; --w-acc-read: #0b4fd0; --w-acc-soft: #e7eeff; --w-ink2: #2e323d; --w-logo: #0e1016; --w-logo-u: #ffffff;
   --w-ok: #2b8a3e; --w-ok-soft: #ebfbee; --w-bad: #e03131; --w-bad-soft: #fff5f5; --w-k1: #0b7285; --w-k2: #6741d9;
+  /* green and red for words, as --w-acc-read is the blue for words: the fills and lines stay brighter */
+  --w-ok-read: #24753a; --w-bad-read: #c92a2a;
   color-scheme: light; background: var(--w-bg); color: var(--w-ink); transition: background-color 0.35s ease, color 0.35s ease;
   font-family: 'Schibsted Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 16px; line-height: 1.55; letter-spacing: normal;
 }
@@ -22,10 +25,15 @@
   --w-bg: #08090c; --w-ink: #eef0f5; --w-ink2: #c3c8d3; --w-mut: #a1a7b4; --w-faint: #7d8493; --w-line: #22262f; --w-card: #101319; --w-track: #252a33;
   --w-acc: #5b93ff; --w-acc-read: #7aa7ff; --w-acc-soft: #14203a; --w-logo: #eef0f5; --w-logo-u: #08090c;
   --w-ok: #69db7c; --w-ok-soft: #0f2618; --w-bad: #ff8787; --w-bad-soft: #2a1215; --w-k1: #66d9e8; --w-k2: #b197fc;
+  --w-ok-read: #69db7c; --w-bad-read: #ff8787;
   color-scheme: dark;
 }
 .lifted > .w { flex: 1 0 auto; display: flex; flex-direction: column; }
-.w a, .w a:hover { color: inherit; text-decoration: none; }
+/* A link takes the colour of what it sits in, unless its own class gives it one. That has to hold while it is pointed at
+   too: a hover rule that set the colour again outranked every button's own, and turned a button's words the colour of the
+   button itself, so "Get an API key" went blank under the pointer. */
+.w a { color: inherit; text-decoration: none; }
+.w a:hover { text-decoration: none; }
 .w :focus-visible { outline: 2px solid var(--w-acc); outline-offset: 2px; border-radius: 6px; }
 /* said to a screen reader, not shown */
 .w .w-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -69,6 +77,13 @@
   background: var(--w-ink); color: var(--w-bg); font-weight: 600; font-size: 14.5px; border: 0; cursor: pointer; white-space: nowrap; }
 .w .w-btn2 { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: 9px; border: 1px solid var(--w-line);
   background: var(--w-card); color: var(--w-ink); font-weight: 600; font-size: 14.5px; white-space: nowrap; }
+/* the buttons answer the pointer with a shade of their own colour, and keep their words' colour */
+.w .w-key, .w .w-btn, .w .w-btn2 { transition: background-color 0.15s ease, border-color 0.15s ease; }
+.w .w-key:hover { background: var(--w-acc-read); }
+.w .w-btn:hover { background: var(--w-ink2); }
+.w .w-btn2:hover { border-color: var(--w-faint); }
+/* a closing heading with its button right under it (no line of words between) leaves the button a little room */
+.w .a-cta h2 + .w-btn, .w .g-cta h2 + .g-btns { margin-top: 14px; }
 [data-mode='dark'] .w .t-win { border-color: #262c3a; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(76, 141, 255, 0.14); }
 
 /* ---- the homepage ---- */
@@ -106,7 +121,7 @@
   overflow: hidden; box-shadow: 0 30px 80px rgba(14, 16, 22, 0.28), 0 0 0 1px rgba(76, 141, 255, 0.08); }
 .w .t-top { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #1a1f2b; }
 .w .t-top i { width: 10px; height: 10px; border-radius: 50%; background: #2a303d; }
-.w .t-top span { margin-left: 8px; font: 12px 'JetBrains Mono', ui-monospace, monospace; color: #6c7385; }
+.w .t-top span { margin-left: 8px; font: 12px 'JetBrains Mono', ui-monospace, monospace; color: #7d8597; }
 .w .t-body { margin: 0; padding: 18px 20px 22px; min-height: 290px; font: 13.5px/1.85 'JetBrains Mono', ui-monospace, monospace; color: #cfd5e1; }
 .w .t-caret { display: inline-block; width: 8px; height: 16px; background: #4c8dff; vertical-align: -3px; animation: w-blink 1s steps(1) infinite; }
 @keyframes w-blink { 50% { opacity: 0; } }
@@ -130,12 +145,9 @@
 .w .rt-ro { transition: opacity 0.5s ease; }
 
 /* ---- the two guides, in the homepage's manner: a centred head, then each step as words beside its picture ---- */
-.w .g-head { display: grid; gap: 18px; justify-items: center; text-align: center; padding-top: clamp(36px, 6vw, 90px); }
+/* the head is the label and the title alone, so it sits closer to what it introduces than sections sit to each other */
+.w .g-head { display: grid; gap: 18px; justify-items: center; text-align: center; padding-top: clamp(36px, 6vw, 90px); margin-bottom: calc(var(--w-gap) * -0.4); }
 .w .g-h1 { margin: 0; font-size: clamp(38px, 5vw, 64px); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
-.w .g-lead { margin: 0; font-size: clamp(17px, 1.5vw, 19px); line-height: 1.6; color: var(--w-mut); max-width: 58ch; text-wrap: pretty; }
-.w .g-lead b { color: var(--w-ink); font-weight: 600; }
-.w .g-aside { margin: 8px 0 0; display: grid; gap: 4px; padding: 12px 18px; border: 1px solid var(--w-line); border-radius: 12px; background: var(--w-card); font-size: 14.5px; color: var(--w-mut); max-width: 46ch; }
-.w .g-aside .w-label { font-size: 10.5px; }
 .w .g-once { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; width: min(100%, 1060px); justify-self: center; }
 .w .g-code { min-width: 0; }
 .w .g-pre { margin: 0; min-height: 0; white-space: pre; overflow-x: auto; }
@@ -148,8 +160,9 @@
 .w .g-txt p b { color: var(--w-ink); font-weight: 600; }
 .w .g-txt .g-num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--w-acc-read); }
 .w .g-steps { display: grid; gap: clamp(64px, 8vw, 112px); width: min(100%, 1060px); justify-self: center; }
-.w .g-rule { display: flex; align-items: center; gap: 16px; }
-.w .g-rule::before, .w .g-rule::after { content: ""; flex: 1; height: 1px; background: var(--w-line); }
+/* "Then Understudy does four things": the turn from the setup to the steps, a step up from the page's other labels */
+.w .g-rule { display: flex; align-items: center; gap: 22px; font-size: 13.5px; font-weight: 500; letter-spacing: 0.16em; color: var(--w-ink2); text-align: center; }
+.w .g-rule::before, .w .g-rule::after { content: ""; flex: 1 0 16px; height: 1px; background: var(--w-faint); opacity: 0.5; }
 .w .g-step { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: clamp(24px, 4vw, 64px); align-items: center; scroll-margin-top: 24px; }
 .w .g-once { scroll-margin-top: 24px; }
 .w .g-fig { margin: 0; display: grid; gap: 10px; min-width: 0; }
@@ -175,6 +188,8 @@
 .w .gd .c-k2 { fill: var(--w-k2); }
 .w .gd .c-ok { fill: var(--w-ok); }
 .w .gd .c-bad { fill: var(--w-bad); }
+.w .gd text.c-ok { fill: var(--w-ok-read); }
+.w .gd text.c-bad { fill: var(--w-bad-read); }
 .w .gd .c-badsoft { fill: var(--w-bad-soft); stroke: var(--w-bad); }
 .w .gd .a-area { fill: var(--w-acc-soft); }
 .w .gd .l-line { fill: none; stroke: var(--w-line); }
@@ -223,8 +238,8 @@
 .w .r-q { padding: 11px 13px; border: 1px solid var(--w-line); border-radius: 10px; background: var(--w-bg); font-size: 13.5px; line-height: 1.4; }
 .w .r-v { display: grid; place-content: center; text-align: center; border: 1px solid; border-radius: 10px; font-size: 12.5px; line-height: 1.3; padding: 8px; }
 .w .r-v b { font-size: 15px; }
-.w .r-v.ok { background: var(--w-ok-soft); border-color: var(--w-ok); color: var(--w-ok); }
-.w .r-v.bad { background: var(--w-bad-soft); border-color: var(--w-bad); color: var(--w-bad); }
+.w .r-v.ok { background: var(--w-ok-soft); border-color: var(--w-ok); color: var(--w-ok-read); }
+.w .r-v.bad { background: var(--w-bad-soft); border-color: var(--w-bad); color: var(--w-bad-read); }
 .w .r-jnote { margin: 4px 0 0; padding: 10px 14px; border: 1px solid var(--w-line); border-radius: 10px; font-size: 13px; color: var(--w-mut); text-align: center; }
 .w .r-prio { display: grid; gap: 10px; }
 .w .r-p { display: grid; gap: 4px; padding: 13px 16px; border: 1px solid var(--w-line); border-radius: 12px; background: var(--w-card); }
@@ -259,11 +274,15 @@
 @media (max-width: 600px) {
   .w .gd-w { display: none; }
   .w .gd-n { display: block; }
+  /* the "four things" label a size down, so it keeps to one line between its rules on a phone */
+  .w .g-rule { font-size: 12px; letter-spacing: 0.12em; gap: 12px; }
   .w .r-jh, .w .r-jr { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr); gap: 8px; }
 }
 /* the small phones (360 px is a common one): a little less room around and between the parts, as the site's top bar
    had before, so all four still fit on one row */
 @media (max-width: 380px) {
+  .w .g-rule { letter-spacing: 0.1em; gap: 10px; }
+  .w .g-rule::before, .w .g-rule::after { flex-basis: 10px; }
   .w .w-nav { padding-inline: 14px; gap: 8px; }
   .w .w-navr { gap: 9px; }
   .w .w-word { font-size: 16px; }

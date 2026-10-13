@@ -192,9 +192,9 @@ const GLOBE = {
 };
 
 /* ---------- step 2: requests from three jobs, each routed to the model proven on it ---------- */
-/* the picture's colours in each theme; `active` is the shade a line takes while a dot is on it */
+/* the picture's colours in each theme (the page's own, site.css); `active` is the shade a line takes while a dot is on it */
 const PAL = {
-  light: { ink: '#0e1016', mut: '#585d6c', faint: '#8a8f9d', line: '#dfe1e7', path: '#d3d6de', pathD: '#bfc3cc', card: '#ffffff', cardSoft: '#fafbfc',
+  light: { ink: '#0e1016', mut: '#585d6c', faint: '#6b7080', line: '#dfe1e7', path: '#d3d6de', pathD: '#bfc3cc', card: '#ffffff', cardSoft: '#fafbfc',
     ink2: '#2e323d', inkSoft: '#454a58', win: ['#e7eeff', '#0b4fd0', null], own: ['#eef0f4', '#454a58', null], rehearse: ['#ffffff', '#6b7080', '#b9bec9'],
     node: '#ffffff', nodeLine: '#b9bec9', nodeIcon: '#585d6c', box: '#0e1016', boxLine: null, divider: '#2a2f3b', kind: 'c', active: '#a2a7b3' },
   dark: { ink: '#eef0f5', mut: '#a1a7b4', faint: '#7d8493', line: '#262a33', path: '#2e333d', pathD: '#3c424e', card: '#101319', cardSoft: '#0c0f14',
