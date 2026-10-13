@@ -515,9 +515,9 @@ const nextWords = (e, skip = null) => {
 const perK = (v) => cents((Number(v) || 0) * 1000);
 
 /* What Understudy is doing for a workload, at the top of its page whatever its state: one sentence, the drawing of where
-   its requests go now, moving only while they arrive, a switch's takeover as one strip with what moves it on, and a few
-   figures, each a label and a number. Before its first test it says how many more requests a test needs; after, the
-   tests say when the next one comes. */
+   its requests go now (always moving once switched, before that only while they arrive), a switch's takeover as one
+   strip with what moves it on, and a few figures, each a label and a number. Before its first test it says how many more
+   requests a test needs; after, the tests say when the next one comes. */
 function Summary({ w, pg, cand, waitsForPerson, copiesOnly, running, busy, act, go, clock }) {
   const d = pg.doing;
   const f = pg.flow || {};
@@ -604,7 +604,8 @@ function Summary({ w, pg, cand, waitsForPerson, copiesOnly, running, busy, act, 
       {drawn ? (
         <div className="wp-flowwrap">
           <div className="wp-flowcap"><span className={`wp-live${arriving && !setUp ? '' : ' idle'}`} aria-hidden="true" />{cap}</div>
-          <FlowSvg d={flowD} state={state} pending={pending} waiting={setUp} still={setUp} idle={!setUp && !arriving} />
+          {/* switched, it always moves, whether or not a request is arriving now: the line above says which */}
+          <FlowSvg d={flowD} state={state} pending={pending} waiting={setUp} idle={!switched && !arriving} />
         </div>
       ) : (
         <p className="wp-sumline">

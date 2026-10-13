@@ -396,9 +396,9 @@ const TALL = {
  * dashed beside it with nothing sent there.
  *   state   'switched' (the default), 'yes' (a model that passed waits for a person's yes, named in pending.name) or
  *           'original' (none has passed, pending.sub says where testing stands)
- *   idle    no request is arriving now: nothing moves and no dot is drawn, since none is flowing
- *   still   a reader who asked for less motion, or a switch waiting for its first request through Understudy: a few
- *           dots placed where they would be, and nothing moving
+ *   idle    nothing moves and no dot is drawn, since none is flowing: the workload page asks for this before a switch,
+ *           while no request is arriving; once switched the drawing always moves
+ *   still   a few dots placed where they would be, and nothing moving (what a reader who asked for less motion always gets)
  */
 export function FlowSvg({ d, still = false, waiting = false, idle = false, state = 'switched', pending = null }) {
   const [ref, , box] = useWidthOf(640, 280);
