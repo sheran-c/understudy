@@ -17,7 +17,7 @@
   <header class="a-hero">
     <div class="a-words">
       <h1 class="a-h1 w-serif">Understudy is the optimizer for AI agents.</h1>
-      <p class="a-h1b w-serif">It tests the frontier on your agent’s own calls, and runs every step on the model that does it best.</p>
+      <p class="a-h1b w-serif">Automatically route every request to the optimal model for cost, speed, and performance.</p>
       <ul class="p-trio"><li><b>+4%</b> precision</li><li><b>91%</b> lower cost</li><li><b>2.3×</b> faster tool calls</li></ul>
       <p class="w-fine">Averages from our own workloads, 19 to 26 September 2026.</p>
     </div>
@@ -34,10 +34,10 @@
 
   <section class="k-step" id="how" aria-label="Step 1">
     <p class="w-label">1. Connect once</p>
-    <p class="k-say w-serif">Point your coding agent at Understudy. Nothing else in your code changes.</p>
-    <div class="t-win" role="group" aria-label="A real switch, replayed line by line">
-      <div class="t-top"><i></i><i></i><i></i><span>understudy · tool-initialization-setup</span></div>
-      <div class="t-body" id="termK" aria-live="off"></div>
+    <p class="k-say w-serif">Change two lines of code</p>
+    <div class="t-win k-code" role="group" aria-label="The two lines of code that change">
+      <div class="t-top"><i></i><i></i><i></i><span>two lines change</span></div>
+      <pre class="t-body g-pre" id="codeK"><span class="k-lines"><span>client = OpenAI(</span><span class="g-hl"><span class="k-ty">    base_url="https://api.understudy.dev/v1",</span></span><span class="g-hl"><span class="k-ty">    api_key=os.environ["UNDERSTUDY_KEY"],</span></span><span>)</span></span></pre>
     </div>
   </section>
 

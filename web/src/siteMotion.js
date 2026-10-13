@@ -1,8 +1,8 @@
-/* The site's three pages, moving (site.css, screens/site/*.html): the homepage's orb of every model tried, its replayed
-   switch and its picture of requests being routed, and the guides' pictures.
+/* The site's three pages, moving (site.css, screens/site/*.html): the homepage's orb of every model tried, its two lines
+   of code typed in and its picture of requests being routed, and the guides' pictures.
 
    Every page is complete at rest, so a still frame, a print or a reader who asked for less motion loses nothing: the
-   orb stands still, the switch shows its whole log, and the routing picture shows its routes with nothing moving.
+   orb stands still, the code shows both its lines, and the routing picture shows its routes with nothing moving.
    Everything runs only while it is on the screen, and everything started here is stopped and taken away again when the
    page goes (stop). The routing picture and the orb are drawn in the page's colours, so they are drawn again when the
    theme changes (retheme).
@@ -564,16 +564,9 @@ function routingScene(svg, cfg, { reduce, isDark, stops, themed }) {
   stops.push(() => { live = false; stop(); svg.textContent = ''; });
 }
 
-/* ---------- step 1: a real switch, replayed line by line, again and again ---------- */
-const TERM = [
-  ['<span class="p">understudy</span> watching tool-initialization-setup', 700],
-  ['<span class="mut">trying</span> <span class="hi">google/gemma-4-31b-it</span> <span class="mut">on 108 of your requests</span>', 900],
-  ['<span class="ok">✓</span> matched 108 of 108 · 0.7 s <span class="mut">(GPT-5.4 1.6 s)</span> · 92% cheaper', 1100],
-  ['<span class="mut">second look on 100 requests it has never seen</span>', 900],
-  ['<span class="ok">✓</span> matched 100 of 100', 900],
-  ['<span class="mut">rolling out</span> 5% → 25% → all', 1000],
-  ['<span class="ok">✓</span> switched · <span class="mut">checked daily against GPT-5.4</span>', 2600],
-];
+/* ---------- step 1: the two lines that change, typed in, again and again ---------- */
+/* a character's time while typing, the pause before each line, and how long the finished code holds before it is typed again */
+const TYPE_MS = 34, LINE_GAP_MS = 320, START_MS = 650, HOLD_MS = 3800;
 
 export function startSiteMotion(root) {
   if (!root) return { stop() {}, retheme() {} };
@@ -643,28 +636,43 @@ export function startSiteMotion(root) {
       () => { running = false; cancelAnimationFrame(raf); });
   }
 
-  /* step 1: the whole log shows until the terminal comes into view, then it types itself out, again and again */
-  const term = root.querySelector('#termK');
-  if (term) {
-    const caret = () => { const c = document.createElement('span'); c.className = 't-caret'; return c; };
-    term.innerHTML = TERM.map(([h]) => `<div class="t-line">${h}</div>`).join('');
-    term.lastElementChild.appendChild(caret());
-    if (!reduce) {
-      let n = 0, timer = 0;
-      const next = () => {
-        if (n === 0) term.innerHTML = '';
-        const [html, wait] = TERM[n];
-        const line = document.createElement('div');
-        line.className = 't-line';
-        line.innerHTML = html;
-        const old = term.querySelector('.t-caret'); if (old) old.remove();
-        line.appendChild(caret());
-        term.appendChild(line);
-        n = (n + 1) % TERM.length;
-        timer = setTimeout(next, n === 0 ? wait + 1400 : wait);
+  /* step 1: both changed lines show until the code comes into view, then they type themselves in, again and again. Only
+     how much of each line shows changes (its width, a character at a time: the code is monospaced), never its text, so
+     the address the page swaps in stays put and a screen reader always reads both lines whole. */
+  const code = root.querySelector('#codeK');
+  if (code && !reduce) {
+    const lines = [...code.querySelectorAll('.g-hl')].map((hl) => ({ hl, ty: hl.querySelector('.k-ty') })).filter((l) => l.ty);
+    if (lines.length) {
+      const caret = document.createElement('i');
+      caret.className = 't-caret';
+      caret.setAttribute('aria-hidden', 'true');
+      let timer = 0;
+      const later = (ms, fn) => { timer = setTimeout(fn, ms); };
+      const whole = () => { caret.remove(); for (const l of lines) { l.hl.classList.remove('is-off'); l.ty.style.maxWidth = ''; } };
+      const type = (i) => {
+        // both typed: the caret rests at the end of the last line, then it all starts again
+        if (i >= lines.length) { later(HOLD_MS, cycle); return; }
+        const { hl, ty } = lines[i];
+        const text = ty.textContent;
+        let n = text.length - text.trimStart().length;   // the indent is there at once
+        hl.classList.remove('is-off');
+        hl.appendChild(caret);
+        const step = () => {
+          ty.style.maxWidth = `${n}ch`;
+          if (n >= text.length) { ty.style.maxWidth = ''; later(LINE_GAP_MS, () => type(i + 1)); return; }
+          n += 1;
+          later(TYPE_MS, step);
+        };
+        step();
       };
-      onSeen(term, next, 0.25);
-      stops.push(() => clearTimeout(timer));
+      // the two lines go blank, then are typed in one after the other
+      const cycle = () => {
+        caret.remove();
+        for (const l of lines) { l.hl.classList.add('is-off'); l.ty.style.maxWidth = '0ch'; }
+        later(START_MS, () => type(0));
+      };
+      onSeen(code, cycle, 0.3);
+      stops.push(() => { clearTimeout(timer); whole(); });
     }
   }
 
