@@ -99,6 +99,98 @@ const ORB = {
   },
 };
 
+/* The light theme's orb, a see-through globe (chosen 13 Oct 2026 from the light-mode board): the dark orb fades its lower
+   half into the dark page, which on the light page left a grey wash. No solid body here: the tries and a few lines of
+   latitude and longitude make the globe, the far side faint behind the near one, the 40 that passed in blue. */
+const LATS = [-60, -30, 0, 30, 60].map((d) => {
+  const y = Math.sin((d * Math.PI) / 180), r = Math.cos((d * Math.PI) / 180);
+  return Array.from({ length: 121 }, (_, k) => [Math.cos((k / 60) * Math.PI) * r, y, Math.sin((k / 60) * Math.PI) * r]);
+});
+// four meridians that stop short of the poles, where they would otherwise meet in one dark point
+const LONS = Array.from({ length: 4 }, (_, m) => {
+  const L = (m / 4) * Math.PI, pole = (66 * Math.PI) / 180;
+  const half = (sign) => Array.from({ length: 61 }, (_, k) => {
+    const p = -pole + (k / 60) * 2 * pole;
+    return [sign * Math.cos(L) * Math.cos(p), sign * Math.sin(p), sign * Math.sin(L) * Math.cos(p)];
+  });
+  return half(1).concat(half(-1));
+});
+const GLOBE = {
+  init(W, H, dpr) {
+    const R = Math.min(W, H) * 0.4, cx = W / 2, cy = H / 2;
+    const off = document.createElement('canvas');
+    off.width = Math.round(W * dpr); off.height = Math.round(H * dpr);
+    const g = off.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.save();
+    g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.clip();
+    const fill = g.createRadialGradient(cx - R * 0.32, cy - R * 0.38, R * 0.05, cx, cy, R);
+    fill.addColorStop(0, 'rgba(255,255,255,0.95)'); fill.addColorStop(0.7, 'rgba(244,247,253,0.75)'); fill.addColorStop(1, 'rgba(226,234,252,0.8)');
+    g.fillStyle = fill; g.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+    g.restore();
+    g.strokeStyle = 'rgba(14,16,22,0.13)'; g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, R - 0.5, 0, Math.PI * 2); g.stroke();
+    return { off, R, cx, cy };
+  },
+  frame(ctx, W, H, t, s) {
+    ctx.clearRect(0, 0, W, H);
+    const TAU = Math.PI * 2;
+    const ring = (from, to, alpha) => {
+      ctx.save(); ctx.translate(s.cx, s.cy); ctx.rotate(-0.32);
+      ctx.strokeStyle = `rgba(15,98,254,${alpha})`; ctx.lineWidth = 1; ctx.setLineDash([2, 6]);
+      ctx.beginPath(); ctx.ellipse(0, 0, s.R * 1.18, s.R * 0.3, 0, from, to); ctx.stroke();
+      ctx.restore();
+    };
+    const dot = (x, y, r, color) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); };
+    const a = t * 0.16, b = 0.42, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+    const turn = (x, y, z) => { const x1 = x * ca + z * sa, z1 = -x * sa + z * ca; return [x1, y * cb - z1 * sb, y * sb + z1 * cb]; };
+    const R = s.R * 0.985;
+    // each line a short piece at a time, fainter the further it turns away, fading out as it reaches the rim
+    const line = (pts, near) => {
+      ctx.lineWidth = 1;
+      let prev = null;
+      for (const [x, y, z] of pts) {
+        const p = turn(x, y, z);
+        if (prev && (near ? p[2] >= 0 && prev[2] >= 0 : p[2] < 0 && prev[2] < 0)) {
+          const d = Math.abs((p[2] + prev[2]) / 2);
+          ctx.strokeStyle = near ? `rgba(14,16,22,${(0.02 + 0.1 * d).toFixed(3)})` : `rgba(14,16,22,${(0.012 + 0.03 * d).toFixed(3)})`;
+          ctx.beginPath(); ctx.moveTo(s.cx + prev[0] * R, s.cy + prev[1] * R); ctx.lineTo(s.cx + p[0] * R, s.cy + p[1] * R); ctx.stroke();
+        }
+        prev = p;
+      }
+    };
+    ring(Math.PI, TAU, 0.28);
+    ctx.drawImage(s.off, 0, 0, W, H);
+    // the far side first, then the near side over it
+    for (const pts of LATS) line(pts, false);
+    for (const pts of LONS) line(pts, false);
+    const near = [];
+    for (const [x, y, z, hot] of FIB) {
+      const [x1, y2, z2] = turn(x, y, z);
+      const px = s.cx + x1 * R, py = s.cy + y2 * R;
+      if (z2 < 0) {
+        if (hot) dot(px, py, 1.7, 'rgba(15,98,254,0.22)');
+        else dot(px, py, 0.75, `rgba(14,16,22,${(0.05 + 0.05 * (1 + z2)).toFixed(3)})`);
+      } else near.push([px, py, z2, hot]);
+    }
+    for (const pts of LATS) line(pts, true);
+    for (const pts of LONS) line(pts, true);
+    for (const [px, py, z2, hot] of near) {
+      if (hot) {
+        dot(px, py, 8, `rgba(15,98,254,${(0.14 * z2).toFixed(3)})`);
+        dot(px, py, 2.6, `rgba(15,98,254,${(0.5 + 0.5 * z2).toFixed(3)})`);
+      } else dot(px, py, 0.8 + 0.6 * z2, `rgba(14,16,22,${(0.16 + 0.42 * z2).toFixed(3)})`);
+    }
+    ring(0, Math.PI, 0.5);
+    const th = t * 0.6, ox = Math.cos(th) * s.R * 1.18, oy = Math.sin(th) * s.R * 0.3;
+    ctx.save(); ctx.translate(s.cx, s.cy); ctx.rotate(-0.32);
+    const front = Math.sin(th) > 0;
+    ctx.fillStyle = front ? '#0f62fe' : 'rgba(15,98,254,0.25)';
+    ctx.beginPath(); ctx.arc(ox, oy, front ? 4.2 : 3, 0, TAU); ctx.fill();
+    ctx.restore();
+  },
+};
+
 /* ---------- step 2: requests from three jobs, each routed to the model proven on it ---------- */
 /* the picture's colours in each theme; `active` is the shade a line takes while a dot is on it */
 const PAL = {
@@ -511,12 +603,13 @@ export function startSiteMotion(root) {
     stops.push(() => { io.disconnect(); stop(); });
   };
 
-  /* the orb */
+  /* the orb: the dark one on the dark theme, the see-through globe on the light one; each theme's still parts are painted
+     the first time that theme is shown at this size, so switching theme draws the other at once */
   const cv = root.querySelector('#orbK');
   if (cv && cv.getContext) {
     const ctx = cv.getContext('2d');
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    let W = 0, H = 0, s = null, raf = 0, running = false, lastW = -1;
+    let W = 0, H = 0, scenes = {}, raf = 0, running = false, lastW = -1;
     const t0 = performance.now();
     const size = () => {
       const r = cv.getBoundingClientRect();
@@ -524,9 +617,16 @@ export function startSiteMotion(root) {
       W = r.width; H = r.height; lastW = r.width;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      s = ORB.init(W, H, dpr);
+      scenes = {};
     };
-    const draw = (t) => { if (s) ORB.frame(ctx, W, H, t, s, isDark()); };
+    const draw = (t) => {
+      if (!W) return;
+      const dark = isDark();
+      const key = dark ? 'dark' : 'light';
+      if (!scenes[key]) scenes[key] = (dark ? ORB : GLOBE).init(W, H, dpr);
+      if (dark) ORB.frame(ctx, W, H, t, scenes[key], true);
+      else GLOBE.frame(ctx, W, H, t, scenes[key]);
+    };
     const frame = (now) => { draw((now - t0) / 1000); if (running) raf = requestAnimationFrame(frame); };
     size();
     draw(0.6);
